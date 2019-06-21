@@ -3,11 +3,11 @@ import scalariform.formatter.preferences._
 import scoverage.ScoverageKeys._
 
 ThisBuild / scalaVersion     := "2.12.8"
-ThisBuild / version          := "0.1.0-SNAPSHOT"
+ThisBuild / version          := "0.0.1"
 ThisBuild / organization     := "co.blocke"
 
 val scalatest = "org.scalatest" %% "scalatest" % "3.0.8" % "test"
-lazy val crossVersions = crossScalaVersions := Seq("2.12.8","2.13.03")
+lazy val crossVersions = crossScalaVersions := Seq("2.12.8","2.13.0")
 
 val basicSettings = Seq(
   coverageMinimum             := 92,  // really this should be 96% but mongo isn't quite up to that yet
@@ -24,7 +24,7 @@ val basicSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .settings(basicSettings: _*)
+  .settings(basicSettings ++ crossVersions: _*)
   .settings(
     name := "listzipper",
     libraryDependencies ++= Seq(scalatest)
