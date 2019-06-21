@@ -1,3 +1,5 @@
+//import sbt._
+//import sbt.Keys._
 import com.typesafe.sbt.SbtScalariform._
 import scalariform.formatter.preferences._
 import scoverage.ScoverageKeys._
@@ -23,8 +25,18 @@ val basicSettings = Seq(
     .setPreference(DoubleIndentConstructorArguments, true),
 )
 
+val pubSettings = Seq (
+  publishMavenStyle := true,
+  bintrayOrganization := Some("blocke"),
+  bintrayReleaseOnPublish in ThisBuild := false,
+  licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
+  bintrayRepository := "releases",
+  bintrayPackageLabels := Seq("scala", "zipper")
+)
+
 lazy val root = (project in file("."))
   .settings(basicSettings ++ crossVersions: _*)
+  .settings(pubSettings: _*)
   .settings(
     name := "listzipper",
     libraryDependencies ++= Seq(scalatest)
