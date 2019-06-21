@@ -143,5 +143,18 @@ class NavSpec() extends FunSpec with Matchers {
         ListZipper(List(1), Some(2), List(3)).toList should be(List(1, 2, 3))
       }
     }
+    describe("Test Coverage") {
+      it("coverage") {
+        val z = ListZipper(List(1, 2, 3))
+        z should be(ListZipper(Nil, Some(1), List(2, 3)))
+        z.get should be(Some(1))
+        z.nonEmpty should be(true)
+        ListZipper(Nil,Some(1),Nil).nonEmpty should be(true)
+        ListZipper(Nil,None,List(1)).nonEmpty should be(true)
+        z.size should be(3)
+        ListZipper(Nil, None, Nil).size should be(0)
+        ListZipper(Nil, Some(1), Nil).size should be(1)
+      }
+    }
   }
 }
