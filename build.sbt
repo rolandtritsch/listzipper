@@ -31,7 +31,7 @@ val pubSettings = Seq (
   bintrayReleaseOnPublish in ThisBuild := false,
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
   bintrayRepository := "releases",
-  bintrayPackageLabels := Seq("scala", "json", "scalajack")
+  bintrayPackageLabels := Seq("scala", "zipper")
 )
 
 lazy val root = (project in file("."))
