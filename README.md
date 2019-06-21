@@ -12,5 +12,5 @@ ListZipper is noth'n fancy.  It's a handy zipper type over List that let's you n
 
 Include it in your projects by adding the following to your build.sbt:
 
-    libraryDependencies ++= Seq("co.blocke" %% "listzipper" % "0.0.1")
+    libraryDependencies ++= Seq("co.blocke" %% "listzipper" % "0.1.0")
 
