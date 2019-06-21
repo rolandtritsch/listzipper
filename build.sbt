@@ -7,6 +7,7 @@ ThisBuild / version          := "0.1.0-SNAPSHOT"
 ThisBuild / organization     := "co.blocke"
 
 val scalatest = "org.scalatest" %% "scalatest" % "3.0.8" % "test"
+lazy val crossVersions = crossScalaVersions := Seq("2.12.8","2.13.03")
 
 val basicSettings = Seq(
   coverageMinimum             := 92,  // really this should be 96% but mongo isn't quite up to that yet
