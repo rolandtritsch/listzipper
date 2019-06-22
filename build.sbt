@@ -37,6 +37,8 @@ val pubSettings = Seq (
 lazy val root = (project in file("."))
   .settings(basicSettings ++ crossVersions: _*)
   .settings(pubSettings: _*)
+  .settings(libraryDependencies ++=
+    Seq("org.scala-lang" % "scala-reflect" % scalaVersion.value))
   .settings(
     name := "listzipper",
     libraryDependencies ++= Seq(scalatest)
