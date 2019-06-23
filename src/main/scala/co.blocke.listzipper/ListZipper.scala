@@ -15,7 +15,7 @@ case class ListZipper[A](left: List[A], focus: Option[A], right: List[A]) {
   def get: Option[A] = focus
 
   @inline final def staticClass(fullName: String): ClassSymbol = scala.reflect.runtime.currentMirror.staticClass(fullName)
-  @inline final def typeFromClassName(className: String) = staticClass(className).toType
+  @inline final def typeFromClassName(className: String): Type = staticClass(className).toType
 
   def isEmpty: Boolean = left.isEmpty && right.isEmpty && focus.isEmpty
   def nonEmpty: Boolean = left.nonEmpty || right.nonEmpty || focus.isDefined
