@@ -141,11 +141,25 @@ class ImmutableSpec() extends FunSpec with Matchers {
         ListZipper(Nil, Some(4), List(5, 6, 7)).mergeLeft((a, b) => a * b) should be(ListZipper(Nil, Some(4), List(5, 6, 7)))
         ListZipper(Nil, None, List(5, 6, 7)).mergeLeft((a, b) => a * b) should be(ListZipper(Nil, None, List(5, 6, 7)))
       }
+      it("leftAs") {
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).mergeLeftAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a")), Some(Item("bc")), List(Item("d"), Item("e"))))
+        ListZipper[Thing](List(Item("a"), NotItem("b")), Some(Item("c")), List(Item("d"), Item("e"))).mergeLeftAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a"), NotItem("b")), Some(Item("c")), List(Item("d"), Item("e"))))
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(NotItem("c")), List(Item("d"), Item("e"))).mergeLeftAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a"), Item("b")), Some(NotItem("c")), List(Item("d"), Item("e"))))
+        ListZipper[Thing](Nil, Some(Item("c")), List(Item("d"), Item("e"))).mergeLeftAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](Nil, Some(Item("c")), List(Item("d"), Item("e"))))
+        ListZipper[Thing](Nil, None, List(Item("d"), Item("e"))).mergeLeftAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](Nil, None, List(Item("d"), Item("e"))))
+      }
       it("right") {
         ListZipper(List(1, 2, 3), Some(4), List(5, 6, 7)).mergeRight((a, b) => a * b) should be(ListZipper(List(1, 2, 3), Some(20), List(6, 7)))
         ListZipper(List(1, 2, 3), Some(4), List(5)).mergeRight((a, b) => a * b) should be(ListZipper(List(1, 2, 3), Some(20), Nil))
         ListZipper(List(1, 2, 3), Some(4), Nil).mergeRight((a, b) => a * b) should be(ListZipper(List(1, 2, 3), Some(4), Nil))
         ListZipper(List(1, 2, 3), None, Nil).mergeRight((a, b) => a * b) should be(ListZipper(List(1, 2, 3), None, Nil))
+      }
+      it("rightAs") {
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).mergeRightAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("cd")), List(Item("e"))))
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(NotItem("c")), List(Item("d"), Item("e"))).mergeRightAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a"), Item("b")), Some(NotItem("c")), List(Item("d"), Item("e"))))
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(NotItem("d"), Item("e"))).mergeRightAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(NotItem("d"), Item("e"))))
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), Nil).mergeRightAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), Nil))
+        ListZipper[Thing](List(Item("a"), Item("b")), None, Nil).mergeRightAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a"), Item("b")), None, Nil))
       }
     }
     describe("toList") {
@@ -163,7 +177,7 @@ class ImmutableSpec() extends FunSpec with Matchers {
       it("coverage") {
         val z = ListZipper(List(1, 2, 3))
         z should be(ListZipper(Nil, Some(1), List(2, 3)))
-        z.get should be(Some(1))
+        z.focus should be(Some(1))
         z.nonEmpty should be(true)
         ListZipper(Nil, Some(1), Nil).nonEmpty should be(true)
         ListZipper(Nil, None, List(1)).nonEmpty should be(true)
