@@ -1,5 +1,7 @@
 package co.blocke.listzipper
 
+import scala.reflect.runtime.universe._
+
 object ListZipper {
   def apply[A](initial: Seq[A]): ListZipper[A] =
     if (initial.isEmpty)
@@ -11,6 +13,9 @@ object ListZipper {
 case class ListZipper[A](left: List[A], focus: Option[A], right: List[A]) {
 
   def get: Option[A] = focus
+
+  @inline final def staticClass(fullName: String): ClassSymbol = scala.reflect.runtime.currentMirror.staticClass(fullName)
+  @inline final def typeFromClassName(className: String): Type = staticClass(className).toType
 
   def isEmpty: Boolean = left.isEmpty && right.isEmpty && focus.isEmpty
   def nonEmpty: Boolean = left.nonEmpty || right.nonEmpty || focus.isDefined
@@ -113,8 +118,24 @@ case class ListZipper[A](left: List[A], focus: Option[A], right: List[A]) {
     case _   => Some(right.head)
   }
 
+  def nextAs[T <: A](implicit tt: TypeTag[T]): Option[T] =
+    if (right.isEmpty)
+      None
+    else right.head match {
+      case a if typeFromClassName(a.getClass.getName) == tt.tpe => Some(a.asInstanceOf[T])
+      case _ => None
+    }
+
   def prev: Option[A] = left match {
     case Nil => None
     case _   => Some(left.last)
   }
+
+  def prevAs[T <: A](implicit tt: TypeTag[T]): Option[A] =
+    if (left.isEmpty)
+      None
+    else left.last match {
+      case a if typeFromClassName(a.getClass.getName) == tt.tpe => Some(a.asInstanceOf[T])
+      case _ => None
+    }
 }

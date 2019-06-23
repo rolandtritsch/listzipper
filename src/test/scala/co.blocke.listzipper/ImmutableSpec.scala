@@ -2,7 +2,13 @@ package co.blocke.listzipper
 
 import org.scalatest.{ FunSpec, Matchers }
 
-class NavSpec() extends FunSpec with Matchers {
+trait Thing {
+  val name: String
+}
+case class Item(name: String) extends Thing
+case class NotItem(name: String) extends Thing
+
+class ImmutableSpec() extends FunSpec with Matchers {
 
   describe("----------------\n:  Navigation  :\n----------------") {
     describe("Left Nav") {
@@ -68,10 +74,20 @@ class NavSpec() extends FunSpec with Matchers {
         ListZipper(List(1), Some(2), Nil).next should be(None)
         ListZipper(List(1, 2), None, Nil).next should be(None)
       }
+      it("NextAs") {
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).nextAs[Item] should be(Some(Item("d")))
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(NotItem("d"), Item("e"))).nextAs[Item] should be(None)
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), Nil).nextAs[Item] should be(None)
+      }
       it("Prev") {
         ListZipper(Nil, Some(1), List(2, 3)).prev should be(None)
         ListZipper(Nil, None, List(1, 2, 3)).prev should be(None)
         ListZipper(List(1), Some(2), List(3)).prev should be(Some(1))
+      }
+      it("PrevAs") {
+        ListZipper[Thing](Nil, Some(Item("c")), List(Item("d"), Item("e"))).prevAs[Item] should be(None)
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).prevAs[Item] should be(Some(Item("b")))
+        ListZipper[Thing](List(Item("a"), NotItem("b")), Some(Item("c")), List(Item("d"), Item("e"))).prevAs[Item] should be(None)
       }
       it("Moveto") {
         val z = ListZipper(List(1, 2), Some(3), List(4, 5))
