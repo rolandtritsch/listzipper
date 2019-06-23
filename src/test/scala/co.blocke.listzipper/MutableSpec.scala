@@ -261,6 +261,37 @@ class MutableSpec() extends FunSpec with Matchers with PrivateMethodTester {
           (Nil, None, List(5, 6, 7))
         )
       }
+      it("leftAs") {
+        val z1 = ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e")))
+        z1.mergeLeftAs[Item]((a, b) => Item(a.name + b.name))
+        (z1 invokePrivate getLeft(), z1 invokePrivate getFocus(), z1 invokePrivate getRight()) should be(
+          (List(Item("a")), Some(Item("bc")), List(Item("d"), Item("e")))
+        )
+
+        val z2 = ListZipper[Thing](List(Item("a"), NotItem("b")), Some(Item("c")), List(Item("d"), Item("e")))
+        z2.mergeLeftAs[Item]((a, b) => Item(a.name + b.name))
+        (z2 invokePrivate getLeft(), z2 invokePrivate getFocus(), z2 invokePrivate getRight()) should be(
+          (List(Item("a"), NotItem("b")), Some(Item("c")), List(Item("d"), Item("e")))
+        )
+
+        val z3 = ListZipper[Thing](List(Item("a"), Item("b")), Some(NotItem("c")), List(Item("d"), Item("e")))
+        z3.mergeLeftAs[Item]((a, b) => Item(a.name + b.name))
+        (z3 invokePrivate getLeft(), z3 invokePrivate getFocus(), z3 invokePrivate getRight()) should be(
+          (List(Item("a"), Item("b")), Some(NotItem("c")), List(Item("d"), Item("e")))
+        )
+
+        val z4 = ListZipper[Thing](Nil, Some(Item("c")), List(Item("d"), Item("e")))
+        z4.mergeLeftAs[Item]((a, b) => Item(a.name + b.name))
+        (z4 invokePrivate getLeft(), z4 invokePrivate getFocus(), z4 invokePrivate getRight()) should be(
+          (Nil, Some(Item("c")), List(Item("d"), Item("e")))
+        )
+
+        val z5 = ListZipper[Thing](Nil, None, List(Item("d"), Item("e")))
+        z5.mergeLeftAs[Item]((a, b) => Item(a.name + b.name))
+        (z5 invokePrivate getLeft(), z5 invokePrivate getFocus(), z5 invokePrivate getRight()) should be(
+          (Nil, None, List(Item("d"), Item("e")))
+        )
+      }
       it("right") {
         val z1 = ListZipper(List(1, 2, 3), Some(4), List(5, 6, 7)).mergeRight((a, b) => a * b)
         (z1 invokePrivate getLeft(), z1 invokePrivate getFocus(), z1 invokePrivate getRight()) should be(
@@ -279,6 +310,37 @@ class MutableSpec() extends FunSpec with Matchers with PrivateMethodTester {
           (List(1, 2, 3), None, Nil)
         )
       }
+      it("rightAs") {
+        val z1 = ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e")))
+          .mergeRightAs[Item]((a, b) => Item(a.name + b.name))
+        (z1 invokePrivate getLeft(), z1 invokePrivate getFocus(), z1 invokePrivate getRight()) should be(
+          (List(Item("a"), Item("b")), Some(Item("cd")), List(Item("e")))
+        )
+
+        val z2 = ListZipper[Thing](List(Item("a"), Item("b")), Some(NotItem("c")), List(Item("d"), Item("e")))
+        z2.mergeRightAs[Item]((a, b) => Item(a.name + b.name))
+        (z2 invokePrivate getLeft(), z2 invokePrivate getFocus(), z2 invokePrivate getRight()) should be(
+          (List(Item("a"), Item("b")), Some(NotItem("c")), List(Item("d"), Item("e")))
+        )
+
+        val z3 = ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(NotItem("d"), Item("e")))
+        z3.mergeRightAs[Item]((a, b) => Item(a.name + b.name))
+        (z3 invokePrivate getLeft(), z3 invokePrivate getFocus(), z3 invokePrivate getRight()) should be(
+          (List(Item("a"), Item("b")), Some(Item("c")), List(NotItem("d"), Item("e")))
+        )
+
+        val z4 = ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), Nil)
+        z4.mergeRightAs[Item]((a, b) => Item(a.name + b.name))
+        (z4 invokePrivate getLeft(), z4 invokePrivate getFocus(), z4 invokePrivate getRight()) should be(
+          (List(Item("a"), Item("b")), Some(Item("c")), Nil)
+        )
+
+        val z5 = ListZipper[Thing](List(Item("a"), Item("b")), None, Nil)
+        z5.mergeRightAs[Item]((a, b) => Item(a.name + b.name))
+        (z5 invokePrivate getLeft(), z5 invokePrivate getFocus(), z5 invokePrivate getRight()) should be(
+          (List(Item("a"), Item("b")), None, Nil)
+        )
+      }
     }
     describe("toList") {
       it("Far Left") {
@@ -295,7 +357,7 @@ class MutableSpec() extends FunSpec with Matchers with PrivateMethodTester {
       it("coverage") {
         val z = ListZipper(List(1, 2, 3))
         z should be(ListZipper(Nil, Some(1), List(2, 3)))
-        z.get should be(Some(1))
+        z.focus should be(Some(1))
         z.nonEmpty should be(true)
         ListZipper(Nil, Some(1), Nil).nonEmpty should be(true)
         ListZipper(Nil, None, List(1)).nonEmpty should be(true)
