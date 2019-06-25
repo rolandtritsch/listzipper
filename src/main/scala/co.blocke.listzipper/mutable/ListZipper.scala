@@ -35,6 +35,25 @@ case class ListZipper[A](private val l: List[A], private val f: Option[A], priva
     case _                       => left.size
   }
 
+  def first: ListZipper[A] = {
+    if (!isEmpty) {
+      val all = this.toList
+      left = Nil
+      _focus = Some(all.head)
+      right = all.tail
+    }
+    this
+  }
+  def last: ListZipper[A] = {
+    if (!isEmpty) {
+      val all = this.toList
+      left = all.take(all.size - 1)
+      _focus = Some(all.last)
+      right = Nil
+    }
+    this
+  }
+
   def toList: List[A] = left ++ { if (_focus.isDefined) _focus.get +: right else right }
 
   def moveTo(i: Int): ListZipper[A] = {
