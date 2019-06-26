@@ -97,6 +97,18 @@ class ImmutableSpec() extends FunSpec with Matchers {
         z.moveTo(4) should be(ListZipper(List(1, 2, 3, 4), Some(5), Nil))
         z.moveTo(5) should be(ListZipper(List(1, 2, 3, 4, 5), None, Nil))
       }
+      it("first") {
+        val z = ListZipper(List(1, 2, 3, 4))
+        z.moveTo(2) should be(ListZipper(List(1, 2), Some(3), List(4)))
+        z.first should be(ListZipper(Nil, Some(1), List(2, 3, 4)))
+        ListZipper(List.empty[Int]).first should be(ListZipper(List.empty[Int]))
+      }
+      it("last") {
+        val z = ListZipper(List(1, 2, 3, 4))
+        z.moveTo(2) should be(ListZipper(List(1, 2), Some(3), List(4)))
+        z.last should be(ListZipper(List(1, 2, 3), Some(4), Nil))
+        ListZipper(List.empty[Int]).last should be(ListZipper(List.empty[Int]))
+      }
     }
   }
   describe("--------------\n:  Mutation  :\n--------------") {
