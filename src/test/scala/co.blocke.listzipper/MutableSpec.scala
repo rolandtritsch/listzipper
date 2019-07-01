@@ -395,6 +395,11 @@ class MutableSpec() extends FunSpec with Matchers with PrivateMethodTester {
         ListZipper(Nil, None, Nil).size should be(0)
         ListZipper(Nil, Some(1), Nil).size should be(1)
       }
+      it("focusAs") {
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).focusAs[Item] should be(Some(Item("c")))
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).focusAs[NotItem] should be(None)
+        ListZipper[Thing](Nil, None, List(Item("d"), Item("e"))).focusAs[Item] should be(None)
+      }
     }
   }
 }

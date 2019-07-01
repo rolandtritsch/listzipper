@@ -17,6 +17,10 @@ case class ListZipper[A](private val l: List[A], private val f: Option[A], priva
   private var right: List[A] = r
 
   def focus: Option[A] = _focus
+  def focusAs[T <: A](implicit tt: TypeTag[T]): Option[T] = _focus match {
+    case Some(a) if isType[T](a) => Some(a.asInstanceOf[T])
+    case _                       => None
+  }
 
   @inline final def staticClass(fullName: String): ClassSymbol = scala.reflect.runtime.currentMirror.staticClass(fullName)
   @inline final def typeFromClassName(className: String): Type = staticClass(className).toType
