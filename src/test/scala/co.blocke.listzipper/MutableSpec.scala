@@ -164,6 +164,36 @@ class MutableSpec() extends FunSpec with Matchers with PrivateMethodTester {
           (List(1, 2, 3, 4, 5), None, Nil)
         )
       }
+      it("first") {
+        val z = ListZipper(List(1, 2, 3, 4))
+        z.moveTo(2)
+        (z invokePrivate getLeft(), z invokePrivate getFocus(), z invokePrivate getRight()) should be(
+          (List(1, 2), Some(3), List(4))
+        )
+        z.first
+        (z invokePrivate getLeft(), z invokePrivate getFocus(), z invokePrivate getRight()) should be(
+          (Nil, Some(1), List(2, 3, 4))
+        )
+        val z2 = ListZipper(List.empty[Int]).first
+        (z2 invokePrivate getLeft(), z2 invokePrivate getFocus(), z2 invokePrivate getRight()) should be(
+          (Nil, None, Nil)
+        )
+      }
+      it("last") {
+        val z = ListZipper(List(1, 2, 3, 4))
+        z.moveTo(2)
+        (z invokePrivate getLeft(), z invokePrivate getFocus(), z invokePrivate getRight()) should be(
+          (List(1, 2), Some(3), List(4))
+        )
+        z.last
+        (z invokePrivate getLeft(), z invokePrivate getFocus(), z invokePrivate getRight()) should be(
+          (List(1, 2, 3), Some(4), Nil)
+        )
+        val z2 = ListZipper(List.empty[Int]).last
+        (z2 invokePrivate getLeft(), z2 invokePrivate getFocus(), z2 invokePrivate getRight()) should be(
+          (Nil, None, Nil)
+        )
+      }
     }
   }
   describe("--------------\n:  Mutation  :\n--------------") {
@@ -364,6 +394,11 @@ class MutableSpec() extends FunSpec with Matchers with PrivateMethodTester {
         z.size should be(3)
         ListZipper(Nil, None, Nil).size should be(0)
         ListZipper(Nil, Some(1), Nil).size should be(1)
+      }
+      it("focusAs") {
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).focusAs[Item] should be(Some(Item("c")))
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).focusAs[NotItem] should be(None)
+        ListZipper[Thing](Nil, None, List(Item("d"), Item("e"))).focusAs[Item] should be(None)
       }
     }
   }

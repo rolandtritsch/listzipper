@@ -17,6 +17,10 @@ case class ListZipper[A](private val l: List[A], private val f: Option[A], priva
   private var right: List[A] = r
 
   def focus: Option[A] = _focus
+  def focusAs[T <: A](implicit tt: TypeTag[T]): Option[T] = _focus match {
+    case Some(a) if isType[T](a) => Some(a.asInstanceOf[T])
+    case _                       => None
+  }
 
   @inline final def staticClass(fullName: String): ClassSymbol = scala.reflect.runtime.currentMirror.staticClass(fullName)
   @inline final def typeFromClassName(className: String): Type = staticClass(className).toType
@@ -33,6 +37,25 @@ case class ListZipper[A](private val l: List[A], private val f: Option[A], priva
     case Nil                     => -1 // off left edge
     case _ if _focus.isEmpty     => -2 // off right edge
     case _                       => left.size
+  }
+
+  def first: ListZipper[A] = {
+    if (!isEmpty) {
+      val all = this.toList
+      left = Nil
+      _focus = Some(all.head)
+      right = all.tail
+    }
+    this
+  }
+  def last: ListZipper[A] = {
+    if (!isEmpty) {
+      val all = this.toList
+      left = all.take(all.size - 1)
+      _focus = Some(all.last)
+      right = Nil
+    }
+    this
   }
 
   def toList: List[A] = left ++ { if (_focus.isDefined) _focus.get +: right else right }

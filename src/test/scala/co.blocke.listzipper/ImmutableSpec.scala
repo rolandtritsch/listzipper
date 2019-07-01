@@ -97,6 +97,18 @@ class ImmutableSpec() extends FunSpec with Matchers {
         z.moveTo(4) should be(ListZipper(List(1, 2, 3, 4), Some(5), Nil))
         z.moveTo(5) should be(ListZipper(List(1, 2, 3, 4, 5), None, Nil))
       }
+      it("first") {
+        val z = ListZipper(List(1, 2, 3, 4))
+        z.moveTo(2) should be(ListZipper(List(1, 2), Some(3), List(4)))
+        z.first should be(ListZipper(Nil, Some(1), List(2, 3, 4)))
+        ListZipper(List.empty[Int]).first should be(ListZipper(List.empty[Int]))
+      }
+      it("last") {
+        val z = ListZipper(List(1, 2, 3, 4))
+        z.moveTo(2) should be(ListZipper(List(1, 2), Some(3), List(4)))
+        z.last should be(ListZipper(List(1, 2, 3), Some(4), Nil))
+        ListZipper(List.empty[Int]).last should be(ListZipper(List.empty[Int]))
+      }
     }
   }
   describe("--------------\n:  Mutation  :\n--------------") {
@@ -184,6 +196,11 @@ class ImmutableSpec() extends FunSpec with Matchers {
         z.size should be(3)
         ListZipper(Nil, None, Nil).size should be(0)
         ListZipper(Nil, Some(1), Nil).size should be(1)
+      }
+      it("focusAs") {
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).focusAs[Item] should be(Some(Item("c")))
+        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).focusAs[NotItem] should be(None)
+        ListZipper[Thing](Nil, None, List(Item("d"), Item("e"))).focusAs[Item] should be(None)
       }
     }
   }
