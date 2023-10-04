@@ -32,10 +32,19 @@ jobs:
         shell: bash
         run: git config --global core.autocrlf false
 
-      - name: Checkout current branch (full)
+      - name: Git checkout (merge)
         uses: actions/checkout@v3
+        if: github.event_name != 'pull_request'
         with:
           fetch-depth: 0
+
+      - name: Git checkout (PR)
+        uses: actions/checkout@v3
+        if: github.event_name == 'pull_request'
+        with:
+          fetch-depth: 0
+          # see: https://frontside.com/blog/2020-05-26-github-actions-pull_request/#how-does-pull_request-affect-actionscheckout
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup Java (zulu@8)
         if: matrix.java == 'zulu@8'
@@ -56,9 +65,11 @@ jobs:
             ~/Library/Caches/Coursier/v1
           key: ${{ runner.os }}-sbt-cache-v2-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
 
-      - name: Build project and run tests
-        shell: bash
-        run: sbt '++${{ matrix.scala }}' +clean +coverage +test +coverageReport +coveralls
+      - name: Build and run tests
+        run: sbt '++${{ matrix.scala }}' +clean +coverage +test
+
+      - name: Upload coverage data to Coveralls
+        run: sbt +coverageReport +coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_FLAG_NAME: Scala ${{ matrix.scala }}
