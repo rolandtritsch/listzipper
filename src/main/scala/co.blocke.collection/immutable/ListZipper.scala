@@ -7,7 +7,7 @@ object ListZipper {
     else
       ListZipper(Nil, Some(initial.head), initial.tail.toList)
 
-  def empty[A]: ListZipper[A] = ListZipper(Nil,None,Nil)
+  def empty[A]: ListZipper[A] = ListZipper(Nil, None, Nil)
 }
 
 case class ListZipper[A](left: List[A], _focus: Option[A], right: List[A]) {
@@ -27,17 +27,19 @@ case class ListZipper[A](left: List[A], _focus: Option[A], right: List[A]) {
     case _                       => left.size
   }
 
-  def map[B](f: (A) => B): ListZipper[B] = 
-    val ml = left.map( a => f(a) )
-    val mf = _focus.map( a => f(a) )
-    val mr = right.map( a => f(a) )
-    ListZipper(ml,mf,mr)
+  def map[B](f: (A) => B): ListZipper[B] = {
+    val ml = left.map(a => f(a))
+    val mf = _focus.map(a => f(a))
+    val mr = right.map(a => f(a))
+    ListZipper(ml, mf, mr)
+  }
 
-  def flagMap[B](f: (A) => IterableOnce[B]): ListZipper[B] =
-    val ml = left.flatMap( a => f(a) )
-    val mf = _focus.flatMap( a => f(a).iterator.to(List).headOption )
-    val mr = right.flatMap( a => f(a) )
-    ListZipper(ml,mf,mr)
+  def flagMap[B](f: (A) => IterableOnce[B]): ListZipper[B] = {
+    val ml = left.flatMap(a => f(a))
+    val mf = _focus.flatMap(a => f(a).iterator.to(List).headOption)
+    val mr = right.flatMap(a => f(a))
+    ListZipper(ml, mf, mr)
+  }
 
   def first: ListZipper[A] =
     if (isEmpty)

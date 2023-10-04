@@ -29,7 +29,7 @@ ThisBuild / scalaVersion     := "3.3.0"
 ThisBuild / organization     := "co.blocke"
 
 val scalatest = "org.scalatest" %% "scalatest" % "3.2.17" % "test"
-lazy val crossVersions = crossScalaVersions := Seq("2.13.0")
+lazy val crossVersions = crossScalaVersions := Seq("2.13.0", "3.3.0")
 
 lazy val root = project
   .in(file("."))
