@@ -29,14 +29,13 @@ ThisBuild / scalaVersion     := "3.3.0"
 ThisBuild / organization     := "co.blocke"
 
 val scalatest = "org.scalatest" %% "scalatest" % "3.2.17" % "test"
-lazy val crossVersions = crossScalaVersions := Seq("2.13.0", "3.3.0")
 
 lazy val root = project
   .in(file("."))
-  .settings(settings ++ crossVersions: _*)
   .settings(
     name := "listzipper",
-    libraryDependencies ++= Seq(scalatest),
+    crossScalaVersions := Seq("2.13.12") :+ scalaVersion.value,
+    libraryDependencies ++= Seq(scalatest)
   )
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec(Zulu, "8"))
