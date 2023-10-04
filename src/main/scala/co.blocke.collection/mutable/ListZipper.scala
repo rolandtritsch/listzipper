@@ -1,6 +1,4 @@
-package co.blocke.listzipper.mutable
-
-import scala.reflect.runtime.universe._
+package co.blocke.collection.mutable
 
 object ListZipper {
   def apply[A](initial: Seq[A]): ListZipper[A] =
@@ -8,23 +6,17 @@ object ListZipper {
       ListZipper(Nil, None, Nil)
     else
       ListZipper(Nil, Some(initial.head), initial.tail.toList)
+
+  def empty[A]: ListZipper[A] = ListZipper(Nil,None,Nil)
 }
 
-case class ListZipper[A](private val l: List[A], private val f: Option[A], private val r: List[A]) {
+case class ListZipper[A](private var left: List[A], private var _focus: Option[A], private var right: List[A]) {
 
-  private var left: List[A] = l
-  private var _focus: Option[A] = f
-  private var right: List[A] = r
+  // private var left: List[A] = l
+  // private var _focus: Option[A] = f
+  // private var right: List[A] = r
 
   def focus: Option[A] = _focus
-  def focusAs[T <: A](implicit tt: TypeTag[T]): Option[T] = _focus match {
-    case Some(a) if isType[T](a) => Some(a.asInstanceOf[T])
-    case _                       => None
-  }
-
-  @inline final def staticClass(fullName: String): ClassSymbol = scala.reflect.runtime.currentMirror.staticClass(fullName)
-  @inline final def typeFromClassName(className: String): Type = staticClass(className).toType
-  @inline final def isType[T](a: Any)(implicit tt: TypeTag[T]) = typeFromClassName(a.getClass.getName) == tt.tpe
 
   def isEmpty: Boolean = left.isEmpty && right.isEmpty && _focus.isEmpty
   def nonEmpty: Boolean = left.nonEmpty || right.nonEmpty || _focus.isDefined
@@ -38,6 +30,18 @@ case class ListZipper[A](private val l: List[A], private val f: Option[A], priva
     case _ if _focus.isEmpty     => -2 // off right edge
     case _                       => left.size
   }
+
+  def map[B](f: (A) => B): ListZipper[B] = 
+    val ml = left.map( a => f(a) )
+    val mf = _focus.map( a => f(a) )
+    val mr = right.map( a => f(a) )
+    ListZipper(ml,mf,mr)
+
+  def flagMap[B](f: (A) => IterableOnce[B]): ListZipper[B] =
+    val ml = left.flatMap( a => f(a) )
+    val mf = _focus.flatMap( a => f(a).iterator.to(List).headOption )
+    val mr = right.flatMap( a => f(a) )
+    ListZipper(ml,mf,mr)
 
   def first: ListZipper[A] = {
     if (!isEmpty) {
@@ -177,25 +181,9 @@ case class ListZipper[A](private val l: List[A], private val f: Option[A], priva
     this
   }
 
-  def mergeLeftAs[T <: A](fn: (T, T) => T)(implicit tt: TypeTag[T]): ListZipper[A] = {
-    if (prevAs[T].isDefined && _focus.isDefined && isType[T](_focus.get)) {
-      _focus = Some(fn(prevAs[T].get, _focus.get.asInstanceOf[T]))
-      left = left.take(left.size - 1)
-    }
-    this
-  }
-
   def mergeRight(fn: (A, A) => A): ListZipper[A] = {
     if (next.isDefined && _focus.isDefined) {
       _focus = Some(fn(_focus.get, next.get))
-      right = right.tail
-    }
-    this
-  }
-
-  def mergeRightAs[T <: A](fn: (T, T) => T)(implicit tt: TypeTag[T]): ListZipper[A] = {
-    if (nextAs[T].isDefined && _focus.isDefined && isType[T](_focus.get)) {
-      _focus = Some(fn(_focus.get.asInstanceOf[T], nextAs[T].get))
       right = right.tail
     }
     this
@@ -206,24 +194,8 @@ case class ListZipper[A](private val l: List[A], private val f: Option[A], priva
     case _   => Some(right.head)
   }
 
-  def nextAs[T <: A](implicit tt: TypeTag[T]): Option[T] =
-    if (right.isEmpty)
-      None
-    else right.head match {
-      case a if isType[T](a) => Some(a.asInstanceOf[T])
-      case _                 => None
-    }
-
   def prev: Option[A] = left match {
     case Nil => None
     case _   => Some(left.last)
   }
-
-  def prevAs[T <: A](implicit tt: TypeTag[T]): Option[T] =
-    if (left.isEmpty)
-      None
-    else left.last match {
-      case a if isType[T](a) => Some(a.asInstanceOf[T])
-      case _                 => None
-    }
 }
