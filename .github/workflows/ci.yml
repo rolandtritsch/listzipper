@@ -71,6 +71,9 @@ jobs:
       - name: Run tests
         run: sbt '++${{ matrix.scala }}' +test
 
+      - name: Aggregate coverage report
+        run: sbt '++${{ matrix.scala }}' +coverageAggregate
+
       - name: Upload coverage data to Coveralls
         run: sbt +coverageReport +coveralls
         env:
