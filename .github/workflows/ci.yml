@@ -65,20 +65,11 @@ jobs:
             ~/Library/Caches/Coursier/v1
           key: ${{ runner.os }}-sbt-cache-v2-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
 
-      - name: Generate coverage instrumentation
-        run: sbt '++${{ matrix.scala }}' +clean +coverage
-
-      - name: Run tests
-        run: sbt '++${{ matrix.scala }}' +test
-
-      - name: Generate coverage report
-        run: sbt '++${{ matrix.scala }}' +coverageReport
-
-      - name: Aggregate coverage report
-        run: sbt '++${{ matrix.scala }}' +coverageAggregate
+      - name: Generate coverage instrumentation and Test
+        run: sbt '++${{ matrix.scala }}' clean coverage test
 
       - name: Upload coverage data to Coveralls
-        run: sbt +coveralls
+        run: sbt '++${{ matrix.scala }}' coverageReport coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_FLAG_NAME: Scala ${{ matrix.scala }}
