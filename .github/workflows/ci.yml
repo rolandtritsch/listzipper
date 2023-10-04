@@ -60,26 +60,9 @@ jobs:
         shell: bash
         run: sbt githubWorkflowCheck
 
-      - name: Build project
+      - name: Build project and run tests
         shell: bash
-        run: sbt '++${{ matrix.scala }}' test
-
-      - name: Git checkout (merge)
-        uses: actions/checkout@v3
-        if: github.event_name != 'pull_request'
-        with:
-          fetch-depth: 0
-
-      - name: Git checkout (PR)
-        uses: actions/checkout@v3
-        if: github.event_name == 'pull_request'
-        with:
-          fetch-depth: 0
-          # see: https://frontside.com/blog/2020-05-26-github-actions-pull_request/#how-does-pull_request-affect-actionscheckout
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Run tests
-        run: sbt clean coverage test
+        run: sbt '++${{ matrix.scala }}' clean coverage test
 
       - name: Upload coverage data to Coveralls
         run: sbt coverageReport coveralls
