@@ -1,3 +1,9 @@
+
+// native packager and scoverage are conflicting...
+libraryDependencySchemes ++= Seq(
+    "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
+)
+
 addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.3")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.0.5")
 addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.3.9")

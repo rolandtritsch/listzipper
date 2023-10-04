@@ -21,7 +21,7 @@ inThisBuild(List(
     .setPreference(AlignArguments, true)
     .setPreference(AlignParameters, true)
     .setPreference(AlignSingleLineCaseStatements, true)
-    .setPreference(DoubleIndentConstructorArguments, true)
+    .setPreference(DoubleIndentConstructorArguments, true),
 ))
 
 name := "listzipper"
@@ -36,7 +36,7 @@ lazy val root = project
   .settings(settings ++ crossVersions: _*)
   .settings(
     name := "listzipper",
-    libraryDependencies ++= Seq(scalatest)
+    libraryDependencies ++= Seq(scalatest),
   )
 
 ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec(Zulu, "8"))
