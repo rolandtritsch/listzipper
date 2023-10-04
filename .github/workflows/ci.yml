@@ -62,11 +62,7 @@ jobs:
 
       - name: Build project and run tests
         shell: bash
-        run: sbt '++${{ matrix.scala }}' clean coverage test
-
-      - name: Upload coverage data to Coveralls
-        shell: bash
-        run: sbt coverageReport coveralls
+        run: sbt '++${{ matrix.scala }}' +clean +coverage +test +coverageReport +coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_FLAG_NAME: Scala ${{ matrix.scala }}
