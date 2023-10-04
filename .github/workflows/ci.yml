@@ -71,11 +71,14 @@ jobs:
       - name: Run tests
         run: sbt '++${{ matrix.scala }}' +test
 
+      - name: Generate coverage report
+        run: sbt '++${{ matrix.scala }}' +coverageReport
+
       - name: Aggregate coverage report
         run: sbt '++${{ matrix.scala }}' +coverageAggregate
 
       - name: Upload coverage data to Coveralls
-        run: sbt +coverageReport +coveralls
+        run: sbt +coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_FLAG_NAME: Scala ${{ matrix.scala }}
