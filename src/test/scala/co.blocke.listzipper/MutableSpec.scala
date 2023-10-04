@@ -59,7 +59,7 @@ class MutableSpec() extends AnyFunSpec with Matchers with PrivateMethodTester {
         z3.crashedLeft should be(true)
       }
       it("While Right") {
-        val z1 = ListZipper(List(1, 2, 3), Some(4), List(5, 6, 6))
+        val z1 = ListZipper(List(1, 2, 3), Some(4), List(5, 6, 7))
         z1.moveRightWhile(_ < 6)
         (z1 invokePrivate getLeft(), z1 invokePrivate getFocus(), z1 invokePrivate getRight()) should be(
           (List(1, 2, 3, 4, 5), Some(6), List(7)))
