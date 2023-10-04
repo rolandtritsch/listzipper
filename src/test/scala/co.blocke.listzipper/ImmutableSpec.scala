@@ -102,6 +102,18 @@ class ImmutableSpec() extends AnyFunSpec with Matchers {
       }
     }
   }
+  describe("Mapping") {
+    it("Monadic Map") {
+      val z = ListZipper(List(1, 2, 3), Some(4), List(5, 6, 7))
+      val z2 = z.map(_.toString)
+      z2 should be(ListZipper(List("1", "2", "3"), Some("4"), List("5", "6", "7")))
+    }
+    it("Monadic FlatMap") {
+      val z = ListZipper(List("abc", "xyz"), Some("foo"), List("hey", "you"))
+      val z2 = z.flatMap(_.toUpperCase)
+      z2 should be(ListZipper(List('A', 'B', 'C', 'X', 'Y', 'Z'), Some('F'), List('O', 'O', 'H', 'E', 'Y', 'Y', 'O', 'U')))
+    }
+  }
   describe("--------------\n:  Mutation  :\n--------------") {
     describe("Modify") {
       it("From Empty") {
@@ -164,9 +176,13 @@ class ImmutableSpec() extends AnyFunSpec with Matchers {
     }
     describe("Test Coverage") {
       it("coverage") {
+
         val e = ListZipper.empty[String]
         e.focus should be(None)
         e.size should be(0)
+        e.isEmpty should be(true)
+        e.nonEmpty should be(false)
+
         val z = ListZipper(List(1, 2, 3))
         z should be(ListZipper(Nil, Some(1), List(2, 3)))
         z.focus should be(Some(1))

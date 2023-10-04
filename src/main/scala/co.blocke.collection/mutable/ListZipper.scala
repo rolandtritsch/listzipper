@@ -38,10 +38,17 @@ case class ListZipper[A](private var left: List[A], private var _focus: Option[A
     ListZipper(ml, mf, mr)
   }
 
-  def flagMap[B](f: (A) => IterableOnce[B]): ListZipper[B] = {
+  def flatMap[B](f: (A) => IterableOnce[B]): ListZipper[B] = {
     val ml = left.flatMap(a => f(a))
-    val mf = _focus.flatMap(a => f(a).iterator.to(List).headOption)
-    val mr = right.flatMap(a => f(a))
+    var ugly: List[B] = Nil
+    val mf = _focus.flatMap { a =>
+      // we gotta spill over any new items to the right side, maintaining focus position
+      val xformed = f(a).iterator.to(List)
+      if (xformed.size > 1)
+        ugly = xformed.drop(1)
+      xformed.headOption
+    }
+    val mr = ugly ++ right.flatMap(a => f(a))
     ListZipper(ml, mf, mr)
   }
 
