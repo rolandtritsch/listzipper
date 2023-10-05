@@ -82,7 +82,7 @@ jobs:
         if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         uses: actions/upload-artifact@v3
         with:
-          name: target-${{ matrix.os }}-${{ matrix.java }}-${{ matrix.scala }}
+          name: target-${{ matrix.os }}-${{ matrix.java }}
           path: targets.tar
 
   publish:
@@ -127,7 +127,7 @@ jobs:
       - name: Download target directories
         uses: actions/download-artifact@v3
         with:
-          name: target-${{ matrix.os }}-${{ matrix.java }}-${{ matrix.scala }}
+          name: target-${{ matrix.os }}-${{ matrix.java }}
 
       - name: Inflate target directories
         run: |
