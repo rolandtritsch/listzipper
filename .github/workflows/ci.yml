@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        scala: [3.3.0]
+        scala: [3.3.0, 2.13.12]
         java: [zulu@8]
     runs-on: ${{ matrix.os }}
     steps:
@@ -53,26 +53,20 @@ jobs:
           distribution: zulu
           java-version: 8
 
-#      - name: Cache sbt
-#        uses: actions/cache@v3
-#        with:
-#          path: |
-#            ~/.sbt
-#            ~/.ivy2/cache
-#            ~/.coursier/cache/v1
-#            ~/.cache/coursier/v1
-#            ~/AppData/Local/Coursier/Cache/v1
-#            ~/Library/Caches/Coursier/v1
-#          key: ${{ runner.os }}-sbt-cache-v2-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
+      - name: Cache sbt
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.sbt
+            ~/.ivy2/cache
+            ~/.coursier/cache/v1
+            ~/.cache/coursier/v1
+            ~/AppData/Local/Coursier/Cache/v1
+            ~/Library/Caches/Coursier/v1
+          key: ${{ runner.os }}-sbt-cache-v2-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
 
-      - name: Generate coverage instrumentation and Test
-        run: sbt clean coverage test 
-
-      - name: Upload coverage data to Coveralls
-        run: sbt coverageReport coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COVERALLS_FLAG_NAME: Scala ${{ matrix.scala }}
+      - name: Build and Test
+        run: sbt '++${{ matrix.scala }}' clean test 
 
       - name: Make target directories
         if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
@@ -98,7 +92,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        scala: [3.3.0]
+        scala: [3.3.0, 2.13.12]
         java: [zulu@8]
     runs-on: ${{ matrix.os }}
     steps:
