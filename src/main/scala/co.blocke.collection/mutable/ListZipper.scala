@@ -72,18 +72,19 @@ case class ListZipper[A](private var left: List[A], private var curFocus: Option
   def moveTo(i: Int): ListZipper[A] = {
     val asList = toList
     val (l, r) = asList.splitAt(i)
-    if (r.isEmpty) {
-      left = l
-      curFocus = None
-      right = Nil
-    } else if (i >= 0) {
-      left = l
-      curFocus = Some(r.head)
-      right = r.tail
-    } else {
-      left = l
-      curFocus = None
-      right = r
+    r match {
+      case rt if rt.isEmpty =>
+        left = l
+        curFocus = None
+        right = Nil
+      case _ if i >= 0 =>
+        left = l
+        curFocus = Some(r.head)
+        right = r.tail
+      case _ =>
+        left = l
+        curFocus = None
+        right = r
     }
     this
   }
@@ -162,17 +163,18 @@ case class ListZipper[A](private var left: List[A], private var curFocus: Option
 
   def delete: ListZipper[A] = {
     if (!curFocus.isEmpty) {
-      if (right.nonEmpty) {
-        curFocus = Some(right.head)
-        right = right.tail
-      } else if (left.nonEmpty) {
-        curFocus = Some(left.last)
-        left = left.take(left.size - 1)
-        right = Nil
-      } else {
-        left = Nil
-        right = Nil
-        curFocus = None
+      this match {
+        case _ if right.nonEmpty =>
+          curFocus = Some(right.head)
+          right = right.tail
+        case _ if left.nonEmpty =>
+          curFocus = Some(left.last)
+          left = left.take(left.size - 1)
+          right = Nil
+        case _ =>
+          left = Nil
+          right = Nil
+          curFocus = None
       }
     }
     this

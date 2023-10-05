@@ -68,12 +68,11 @@ case class ListZipper[A](left: List[A], curFocus: Option[A], right: List[A]) {
   def moveTo(i: Int): ListZipper[A] = {
     val asList = toList
     val (l, r) = asList.splitAt(i)
-    if (r.isEmpty)
-      ListZipper(l, None, Nil)
-    else if (i >= 0)
-      ListZipper(l, Some(r.head), r.tail)
-    else
-      ListZipper(l, None, r)
+    r match {
+      case Nil         => ListZipper(l, None, Nil)
+      case _ if i >= 0 => ListZipper(l, Some(r.head), r.tail)
+      case _           => ListZipper(l, None, r)
+    }
   }
 
   def moveLeft: ListZipper[A] = left match {
@@ -105,12 +104,11 @@ case class ListZipper[A](left: List[A], curFocus: Option[A], right: List[A]) {
   }
 
   def modify(a: A): ListZipper[A] =
-    if (isEmpty)
-      ListZipper(Nil, Some(a), Nil)
-    else if (curFocus.isDefined)
-      this.copy(curFocus = Some(a))
-    else
-      this // nothing changed...nothing in curFocus
+    this match {
+      case _ if isEmpty            => ListZipper(Nil, Some(a), Nil)
+      case _ if curFocus.isDefined => this.copy(curFocus = Some(a))
+      case _                       => this // nothing changed...nothing in curFocus
+    }
 
   def insertBefore(a: A): ListZipper[A] =
     if (curFocus.isDefined)
@@ -125,14 +123,12 @@ case class ListZipper[A](left: List[A], curFocus: Option[A], right: List[A]) {
       ListZipper(left, Some(a), right)
 
   def delete: ListZipper[A] =
-    if (curFocus.isEmpty)
-      this
-    else if (right.nonEmpty)
-      ListZipper(left, Some(right.head), right.tail)
-    else if (left.nonEmpty)
-      ListZipper(left.take(left.size - 1), Some(left.last), Nil)
-    else
-      ListZipper(Nil, None, Nil)
+    curFocus match {
+      case c if c.isEmpty      => this
+      case _ if right.nonEmpty => ListZipper(left, Some(right.head), right.tail)
+      case _ if left.nonEmpty  => ListZipper(left.take(left.size - 1), Some(left.last), Nil)
+      case _                   => ListZipper(Nil, None, Nil)
+    }
 
   def mergeLeft(fn: (A, A) => A): ListZipper[A] =
     if (prev.isDefined && curFocus.isDefined)
