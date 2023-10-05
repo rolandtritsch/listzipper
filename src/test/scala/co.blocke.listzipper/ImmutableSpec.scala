@@ -1,6 +1,7 @@
-package co.blocke.listzipper
+package co.blocke.collection.immutable
 
-import org.scalatest.{ FunSpec, Matchers }
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 trait Thing {
   val name: String
@@ -8,7 +9,7 @@ trait Thing {
 case class Item(name: String) extends Thing
 case class NotItem(name: String) extends Thing
 
-class ImmutableSpec() extends FunSpec with Matchers {
+class ImmutableSpec() extends AnyFunSpec with Matchers {
 
   describe("----------------\n:  Navigation  :\n----------------") {
     describe("Left Nav") {
@@ -74,20 +75,10 @@ class ImmutableSpec() extends FunSpec with Matchers {
         ListZipper(List(1), Some(2), Nil).next should be(None)
         ListZipper(List(1, 2), None, Nil).next should be(None)
       }
-      it("NextAs") {
-        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).nextAs[Item] should be(Some(Item("d")))
-        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(NotItem("d"), Item("e"))).nextAs[Item] should be(None)
-        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), Nil).nextAs[Item] should be(None)
-      }
       it("Prev") {
         ListZipper(Nil, Some(1), List(2, 3)).prev should be(None)
         ListZipper(Nil, None, List(1, 2, 3)).prev should be(None)
         ListZipper(List(1), Some(2), List(3)).prev should be(Some(1))
-      }
-      it("PrevAs") {
-        ListZipper[Thing](Nil, Some(Item("c")), List(Item("d"), Item("e"))).prevAs[Item] should be(None)
-        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).prevAs[Item] should be(Some(Item("b")))
-        ListZipper[Thing](List(Item("a"), NotItem("b")), Some(Item("c")), List(Item("d"), Item("e"))).prevAs[Item] should be(None)
       }
       it("Moveto") {
         val z = ListZipper(List(1, 2), Some(3), List(4, 5))
@@ -109,6 +100,18 @@ class ImmutableSpec() extends FunSpec with Matchers {
         z.last should be(ListZipper(List(1, 2, 3), Some(4), Nil))
         ListZipper(List.empty[Int]).last should be(ListZipper(List.empty[Int]))
       }
+    }
+  }
+  describe("Mapping") {
+    it("Monadic Map") {
+      val z = ListZipper(List(1, 2, 3), Some(4), List(5, 6, 7))
+      val z2 = z.map(_.toString)
+      z2 should be(ListZipper(List("1", "2", "3"), Some("4"), List("5", "6", "7")))
+    }
+    it("Monadic FlatMap") {
+      val z = ListZipper(List("abc", "xyz"), Some("foo"), List("hey", "you"))
+      val z2 = z.flatMap(_.toUpperCase)
+      z2 should be(ListZipper(List('A', 'B', 'C', 'X', 'Y', 'Z'), Some('F'), List('O', 'O', 'H', 'E', 'Y', 'Y', 'O', 'U')))
     }
   }
   describe("--------------\n:  Mutation  :\n--------------") {
@@ -153,25 +156,11 @@ class ImmutableSpec() extends FunSpec with Matchers {
         ListZipper(Nil, Some(4), List(5, 6, 7)).mergeLeft((a, b) => a * b) should be(ListZipper(Nil, Some(4), List(5, 6, 7)))
         ListZipper(Nil, None, List(5, 6, 7)).mergeLeft((a, b) => a * b) should be(ListZipper(Nil, None, List(5, 6, 7)))
       }
-      it("leftAs") {
-        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).mergeLeftAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a")), Some(Item("bc")), List(Item("d"), Item("e"))))
-        ListZipper[Thing](List(Item("a"), NotItem("b")), Some(Item("c")), List(Item("d"), Item("e"))).mergeLeftAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a"), NotItem("b")), Some(Item("c")), List(Item("d"), Item("e"))))
-        ListZipper[Thing](List(Item("a"), Item("b")), Some(NotItem("c")), List(Item("d"), Item("e"))).mergeLeftAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a"), Item("b")), Some(NotItem("c")), List(Item("d"), Item("e"))))
-        ListZipper[Thing](Nil, Some(Item("c")), List(Item("d"), Item("e"))).mergeLeftAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](Nil, Some(Item("c")), List(Item("d"), Item("e"))))
-        ListZipper[Thing](Nil, None, List(Item("d"), Item("e"))).mergeLeftAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](Nil, None, List(Item("d"), Item("e"))))
-      }
       it("right") {
         ListZipper(List(1, 2, 3), Some(4), List(5, 6, 7)).mergeRight((a, b) => a * b) should be(ListZipper(List(1, 2, 3), Some(20), List(6, 7)))
         ListZipper(List(1, 2, 3), Some(4), List(5)).mergeRight((a, b) => a * b) should be(ListZipper(List(1, 2, 3), Some(20), Nil))
         ListZipper(List(1, 2, 3), Some(4), Nil).mergeRight((a, b) => a * b) should be(ListZipper(List(1, 2, 3), Some(4), Nil))
         ListZipper(List(1, 2, 3), None, Nil).mergeRight((a, b) => a * b) should be(ListZipper(List(1, 2, 3), None, Nil))
-      }
-      it("rightAs") {
-        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).mergeRightAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("cd")), List(Item("e"))))
-        ListZipper[Thing](List(Item("a"), Item("b")), Some(NotItem("c")), List(Item("d"), Item("e"))).mergeRightAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a"), Item("b")), Some(NotItem("c")), List(Item("d"), Item("e"))))
-        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(NotItem("d"), Item("e"))).mergeRightAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(NotItem("d"), Item("e"))))
-        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), Nil).mergeRightAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), Nil))
-        ListZipper[Thing](List(Item("a"), Item("b")), None, Nil).mergeRightAs[Item]((a, b) => Item(a.name + b.name)) should be(ListZipper[Thing](List(Item("a"), Item("b")), None, Nil))
       }
     }
     describe("toList") {
@@ -187,6 +176,13 @@ class ImmutableSpec() extends FunSpec with Matchers {
     }
     describe("Test Coverage") {
       it("coverage") {
+
+        val e = ListZipper.empty[String]
+        e.focus should be(None)
+        e.size should be(0)
+        e.isEmpty should be(true)
+        e.nonEmpty should be(false)
+
         val z = ListZipper(List(1, 2, 3))
         z should be(ListZipper(Nil, Some(1), List(2, 3)))
         z.focus should be(Some(1))
@@ -196,11 +192,6 @@ class ImmutableSpec() extends FunSpec with Matchers {
         z.size should be(3)
         ListZipper(Nil, None, Nil).size should be(0)
         ListZipper(Nil, Some(1), Nil).size should be(1)
-      }
-      it("focusAs") {
-        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).focusAs[Item] should be(Some(Item("c")))
-        ListZipper[Thing](List(Item("a"), Item("b")), Some(Item("c")), List(Item("d"), Item("e"))).focusAs[NotItem] should be(None)
-        ListZipper[Thing](Nil, None, List(Item("d"), Item("e"))).focusAs[Item] should be(None)
       }
     }
   }
