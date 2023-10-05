@@ -10,26 +10,26 @@ object ListZipper {
   def empty[A]: ListZipper[A] = ListZipper(Nil, None, Nil)
 }
 
-case class ListZipper[A](left: List[A], _focus: Option[A], right: List[A]) {
+case class ListZipper[A](left: List[A], curFocus: Option[A], right: List[A]) {
 
-  def focus: Option[A] = _focus
+  def focus: Option[A] = curFocus
 
-  def isEmpty: Boolean = left.isEmpty && right.isEmpty && _focus.isEmpty
-  def nonEmpty: Boolean = left.nonEmpty || right.nonEmpty || _focus.isDefined
-  def crashedLeft: Boolean = left.isEmpty && _focus.isEmpty
-  def crashedRight: Boolean = right.isEmpty && _focus.isEmpty
+  def isEmpty: Boolean = left.isEmpty && right.isEmpty && curFocus.isEmpty
+  def nonEmpty: Boolean = left.nonEmpty || right.nonEmpty || curFocus.isDefined
+  def crashedLeft: Boolean = left.isEmpty && curFocus.isEmpty
+  def crashedRight: Boolean = right.isEmpty && curFocus.isEmpty
 
-  def size: Int = left.size + right.size + { if (_focus.isDefined) 1 else 0 }
+  def size: Int = left.size + right.size + { if (curFocus.isDefined) 1 else 0 }
   def index: Int = left match {
-    case Nil if _focus.isDefined => 0
-    case Nil                     => -1 // off left edge
-    case _ if _focus.isEmpty     => -2 // off right edge
-    case _                       => left.size
+    case Nil if curFocus.isDefined => 0
+    case Nil                       => -1 // off left edge
+    case _ if curFocus.isEmpty     => -2 // off right edge
+    case _                         => left.size
   }
 
   def map[B](f: (A) => B): ListZipper[B] = {
     val ml = left.map(a => f(a))
-    val mf = _focus.map(a => f(a))
+    val mf = curFocus.map(a => f(a))
     val mr = right.map(a => f(a))
     ListZipper(ml, mf, mr)
   }
@@ -37,7 +37,7 @@ case class ListZipper[A](left: List[A], _focus: Option[A], right: List[A]) {
   def flatMap[B](f: (A) => IterableOnce[B]): ListZipper[B] = {
     val ml = left.flatMap(a => f(a))
     var ugly: List[B] = Nil
-    val mf = _focus.flatMap { a =>
+    val mf = curFocus.flatMap { a =>
       // we gotta spill over any new items to the right side, maintaining focus position
       val xformed = f(a).iterator.to(List)
       if (xformed.size > 1)
@@ -63,7 +63,7 @@ case class ListZipper[A](left: List[A], _focus: Option[A], right: List[A]) {
       ListZipper(all.take(all.size - 1), Some(all.last), Nil)
     }
 
-  def toList: List[A] = left ++ { if (_focus.isDefined) _focus.get +: right else right }
+  def toList: List[A] = left ++ { if (curFocus.isDefined) curFocus.get +: right else right }
 
   def moveTo(i: Int): ListZipper[A] = {
     val asList = toList
@@ -77,29 +77,29 @@ case class ListZipper[A](left: List[A], _focus: Option[A], right: List[A]) {
   }
 
   def moveLeft: ListZipper[A] = left match {
-    case Nil if _focus.isDefined => ListZipper(Nil, None, this._focus.get +: right) // on the left edge...de_focus
-    case Nil                     => this // already off the left edge... do nothing
-    case _ if _focus.isEmpty     => ListZipper(left.take(left.length - 1), Some(left.last), Nil)
-    case _                       => ListZipper(left.take(left.length - 1), Some(left.last), this._focus.get +: right)
+    case Nil if curFocus.isDefined => ListZipper(Nil, None, this.curFocus.get +: right) // on the left edge...decurFocus
+    case Nil                       => this // already off the left edge... do nothing
+    case _ if curFocus.isEmpty     => ListZipper(left.take(left.length - 1), Some(left.last), Nil)
+    case _                         => ListZipper(left.take(left.length - 1), Some(left.last), this.curFocus.get +: right)
   }
 
   def moveLeftWhile(fn: A => Boolean): ListZipper[A] = {
     var z = this
-    while (z._focus.isDefined && fn(z._focus.get))
+    while (z.curFocus.isDefined && fn(z.curFocus.get))
       z = z.moveLeft
     z
   }
 
   def moveRight: ListZipper[A] = right match {
-    case Nil if _focus.isDefined => ListZipper(left :+ this._focus.get, None, Nil) // on the right edge...de_focus
-    case Nil                     => this // already off the right edge... do nothing
-    case _ if _focus.isEmpty     => ListZipper(Nil, Some(right.head), right.tail)
-    case _                       => ListZipper(left :+ this._focus.get, Some(right.head), right.tail)
+    case Nil if curFocus.isDefined => ListZipper(left :+ this.curFocus.get, None, Nil) // on the right edge...decurFocus
+    case Nil                       => this // already off the right edge... do nothing
+    case _ if curFocus.isEmpty     => ListZipper(Nil, Some(right.head), right.tail)
+    case _                         => ListZipper(left :+ this.curFocus.get, Some(right.head), right.tail)
   }
 
   def moveRightWhile(fn: A => Boolean): ListZipper[A] = {
     var z = this
-    while (z._focus.isDefined && fn(z._focus.get))
+    while (z.curFocus.isDefined && fn(z.curFocus.get))
       z = z.moveRight
     z
   }
@@ -107,25 +107,25 @@ case class ListZipper[A](left: List[A], _focus: Option[A], right: List[A]) {
   def modify(a: A): ListZipper[A] =
     if (isEmpty)
       ListZipper(Nil, Some(a), Nil)
-    else if (_focus.isDefined)
-      this.copy(_focus = Some(a))
+    else if (curFocus.isDefined)
+      this.copy(curFocus = Some(a))
     else
-      this // nothing changed...nothing in _focus
+      this // nothing changed...nothing in curFocus
 
   def insertBefore(a: A): ListZipper[A] =
-    if (_focus.isDefined)
-      ListZipper(left :+ a, _focus, right)
+    if (curFocus.isDefined)
+      ListZipper(left :+ a, curFocus, right)
     else
       ListZipper(left, Some(a), right)
 
   def insertAfter(a: A): ListZipper[A] =
-    if (_focus.isDefined)
-      ListZipper(left, _focus, a +: right)
+    if (curFocus.isDefined)
+      ListZipper(left, curFocus, a +: right)
     else
       ListZipper(left, Some(a), right)
 
   def delete: ListZipper[A] =
-    if (_focus.isEmpty)
+    if (curFocus.isEmpty)
       this
     else if (right.nonEmpty)
       ListZipper(left, Some(right.head), right.tail)
@@ -135,14 +135,14 @@ case class ListZipper[A](left: List[A], _focus: Option[A], right: List[A]) {
       ListZipper(Nil, None, Nil)
 
   def mergeLeft(fn: (A, A) => A): ListZipper[A] =
-    if (prev.isDefined && _focus.isDefined)
-      ListZipper(left.take(left.size - 1), Some(fn(prev.get, _focus.get)), right)
+    if (prev.isDefined && curFocus.isDefined)
+      ListZipper(left.take(left.size - 1), Some(fn(prev.get, curFocus.get)), right)
     else
       this
 
   def mergeRight(fn: (A, A) => A): ListZipper[A] =
-    if (next.isDefined && _focus.isDefined)
-      ListZipper(left, Some(fn(_focus.get, next.get)), right.tail)
+    if (next.isDefined && curFocus.isDefined)
+      ListZipper(left, Some(fn(curFocus.get, next.get)), right.tail)
     else
       this
 
